@@ -1,0 +1,113 @@
+---
+title: "Music player — full playback controls and features"
+description: "DiegoMusic's player offers a full set of playback controls, a reorderable queue, sleep timer, lock-screen integration, and in-app video playback."
+---
+
+The player is the core of the DiegoMusic experience. It streams audio from your self-hosted backend and exposes a rich set of controls in two states: a compact bar that stays visible at the bottom of every screen, and a full-screen expanded view with all playback options. Both states update in real time as tracks change.
+
+<Note>
+  An internet connection is required to stream audio for the first time. Songs you have saved to favorites are stored locally and play from device storage even when you are offline.
+</Note>
+
+## Minimized player
+
+Whenever a song is loaded, a compact player bar appears at the bottom of the screen, above the tab navigation. It shows:
+
+- The song **thumbnail**, **title**, and **artist name**.
+- A **play/pause button** on the right.
+- A thin **progress bar** running along the bottom edge.
+
+You can interact with the mini player in several ways without opening the full view:
+
+- **Tap** anywhere on the info area to expand the player.
+- **Swipe up** on the bar to expand the player.
+- **Swipe left** to skip to the next song.
+- **Swipe right** to go back to the previous song.
+
+## Expanded player
+
+Tap the minimized player (or swipe up) to open the full-screen expanded view. Swipe down or tap the chevron at the top to collapse it back. The expanded player gives you access to all ten controls described in the README:
+
+1. **Play / pause** — large center button; dims while buffering.
+2. **Next track** — skip to the next song in the queue.
+3. **Previous track** — skip to the previous song in the queue.
+4. **Video view** — open the music video in the in-app video player (see [Video playback](#video-playback)).
+5. **Share** — share the YouTube link and song title via the device's native share sheet.
+6. **Save to favorites** — tap the heart icon to toggle the song as a favorite; the audio file and thumbnail are downloaded to the device.
+7. **Queue** — open the playback queue modal to see and reorder upcoming songs.
+8. **Sleep timer** — set a timer after which playback pauses automatically.
+9. **Shuffle** — toggle shuffle mode on or off.
+10. **Save artist** — save the current song's artist to your favorites so they appear on the home screen.
+11. **Open on YouTube** — shared via the share sheet, which includes the full YouTube URL for the current song.
+
+A scrubber bar below the artwork lets you seek to any position in the track by dragging or tapping. Current position and total duration are shown on either side.
+
+## Shuffle and repeat
+
+The shuffle and repeat controls sit on the main controls row in the expanded player.
+
+- **Shuffle** (`shuffle` icon, highlighted in blue when active) — randomizes the order in which songs in the current queue play. Enabling shuffle repositions the queue so the remaining songs appear in a random order, but keeps the current song playing. Toggling shuffle off restores the original queue order.
+
+The `repeat` icon in the expanded player toggles between two modes:
+
+<AccordionGroup>
+  <Accordion title="No repeat (default)">
+    When the last song in the queue finishes, playback stops. The next-track button wraps to the first song in the queue but does not auto-play.
+  </Accordion>
+  <Accordion title="Repeat one">
+    The current song repeats indefinitely until you change the repeat mode or skip manually. The repeat icon turns blue to indicate this mode is active.
+  </Accordion>
+</AccordionGroup>
+
+Tap the repeat icon to toggle between off and repeat-one.
+
+## Queue
+
+The queue modal opens when you tap the **list** icon in the expanded player's footer actions row. It shows every song that will play after the current track, in order.
+
+**Reordering songs:** Press and hold the drag handle on any song row, then drag it to the desired position. The queue uses `react-native-draggable-flatlist` for smooth drag-and-drop reordering. The new order takes effect immediately.
+
+Songs are added to the queue automatically when you play a song from search results — DiegoMusic fetches the artist's channel videos and queues them up after the selected song. Playing from the **Favorites** tab queues all of your saved songs. You can also toggle **Shuffle** directly from the queue modal header.
+
+## Sleep timer
+
+Tap the timer icon in the expanded player's footer to open the sleep timer modal. Choose from the following durations:
+
+| Option | Duration |
+|--------|----------|
+| Disable | Cancels any active timer |
+| 5 minutes | 5 min |
+| 15 minutes | 15 min |
+| 30 minutes | 30 min |
+| 45 minutes | 45 min |
+| 1 hour | 60 min |
+| 2 hours | 120 min |
+| 3 hours | 180 min |
+| 4 hours | 240 min |
+
+When the timer fires, playback pauses automatically. The timer icon in the expanded player turns blue while a timer is active, and the modal header shows the remaining duration.
+
+## Lock screen controls
+
+DiegoMusic plays audio in the background and registers media controls with the operating system via `expo-media-control`. This means the lock screen and notification center show a media card with:
+
+- **Play / pause** — toggle playback without unlocking the device.
+- **Next track** — skip to the next song in the queue.
+- **Previous track** — go back to the previous song.
+- **Seek bar** — drag to seek to any position (on supported OS versions).
+
+Song metadata (title, artist, and artwork) is kept in sync with the lock screen card as tracks change.
+
+## Video playback
+
+Tap the **video** icon in the expanded player controls to load the music video for the current song inside the app using `expo-video`. The video player replaces the album-art carousel and shares the same seek bar and play/pause button as audio playback.
+
+**Quality options** are configured in [Settings](/features/settings). The selected quality maps to a yt-dlp format selector on the backend:
+
+| Setting | Resolution |
+|---------|-----------|
+| Low | 360p |
+| Medium | 480p |
+| High | 1080p |
+
+While a video is loading, the artwork area shows a loading indicator and playback controls are disabled until the stream is ready. Tap the fullscreen icon to rotate the video to landscape. Long-press the fullscreen view to exit back to portrait.

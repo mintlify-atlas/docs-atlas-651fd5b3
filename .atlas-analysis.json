@@ -1,0 +1,82 @@
+{
+  "projectType": "saas",
+  "projectName": "DiegoMusic",
+  "projectDescription": "A free music streaming app for iOS and Android that plays songs and videos via YouTube, with favorites, offline support, and a full-featured player.",
+  "theme": "almond",
+  "primaryColor": "#2c5af3",
+  "lightColor": "#6b8ff8",
+  "darkColor": "#1a3bbf",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              "features/home",
+              "features/player",
+              "features/search",
+              "features/favorites",
+              "features/settings"
+            ]
+          },
+          {
+            "group": "Deployment",
+            "pages": [
+              "deployment/backend",
+              "deployment/mobile-app",
+              "deployment/configuration"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api/overview"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "pages": [
+              "api/search",
+              "api/audio",
+              "api/video",
+              "api/status"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Stream music and music videos sourced from YouTube without a premium subscription",
+    "Full-featured player with play/pause, next/previous, shuffle, repeat, and sleep timer",
+    "Offline playback for favorited songs downloaded to device storage",
+    "Home screen with recently played tracks and favorite artists with recommendations",
+    "Search by song, artist, or music genre with in-memory caching for fast results",
+    "Lock screen and background playback with media controls via expo-media-control",
+    "Dockerized Node.js backend using yt-dlp and FFmpeg for audio/video extraction",
+    "Multi-language support via a built-in LanguageContext"
+  ],
+  "publicApiSurface": [
+    "GET /api/youtube/search/video?search={query}&limit={n}",
+    "GET /api/youtube/search/channel/videos?channelId={id}",
+    "GET /api/youtube/audio/download?url={youtubeUrl}&start={seconds}",
+    "GET /api/youtube/audio/url?url={youtubeUrl}",
+    "GET /api/youtube/audio/prefetch?url={youtubeUrl}",
+    "GET /api/youtube/video/stream?url={youtubeUrl}&quality={low|medium|high}",
+    "GET /api/status"
+  ]
+}

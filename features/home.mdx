@@ -1,0 +1,37 @@
+---
+title: "Home screen — your music library at a quick glance"
+description: "The home screen surfaces your recently played songs, favorite artists, and most-played tracks so you can start listening the moment you open the app."
+---
+
+The home screen is designed to get you to music immediately. Every time you open DiegoMusic, it shows you the songs and artists that matter most to you — no searching required. The screen is organized into three distinct sections that update automatically as you listen.
+
+## Recently played
+
+The top of the home screen shows up to **8 of your most recently played songs**, pulled from a list stored in local async storage. Each entry displays the song thumbnail, title, and channel name so you can recognize tracks at a glance. Tap any entry to start playing again right where you left off.
+
+The list updates every time you finish or skip a song, keeping your most current listening history at the top.
+
+## Favorite artists
+
+Below your recent plays, DiegoMusic surfaces up to **3 of your saved favorite artists**, chosen randomly from your full favorites list each time the screen loads. This rotation is intentional: if you have more than three favorite artists, a random selection appears on each visit to keep the home feed feeling fresh.
+
+Tap an artist card to open a channel overlay showing popular songs from that artist's YouTube channel. The same overlay appears when you tap an artist name in the player.
+
+<Tip>
+  To see an artist on your home screen, save them as a favorite while a song is playing. Open the expanded player, then tap the save-artist icon (the person with a plus symbol). The artist will appear in the **Favorite artists** section on your next visit to the home screen.
+</Tip>
+
+## Most played
+
+The **Most played** section ranks up to your **top 10 songs** by how many times you have played them, sorted from highest to lowest play count. The ranking is tracked locally by a `timesPlayed` counter and updates in real time as you listen.
+
+If you have not played enough songs yet to fill the list, the section displays an empty state message until your history grows.
+
+## Stats overlay
+
+The trophy icon in the upper-right corner of the header opens a **statistics overlay** that gives you a summary of your listening activity. The overlay shows:
+
+- Your current **listening streak** — consecutive days on which you have played at least one song.
+- **Play counts** for your most active sessions, so you can see how your habits change over time.
+
+Tap the trophy icon to open the overlay, and tap anywhere outside it (or press the close button) to dismiss it.

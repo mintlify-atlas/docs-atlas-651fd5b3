@@ -1,0 +1,60 @@
+---
+title: "DiegoMusic — free self-hosted music streaming app"
+description: "DiegoMusic is a free, open-source music streaming app for iOS and Android that streams audio and video from YouTube via a self-hosted backend."
+---
+
+DiegoMusic is a free, open-source music streaming app for iOS and Android. It works by connecting a React Native mobile client to a self-hosted Node.js backend, which extracts audio and video from YouTube using yt-dlp. You get a Spotify-like experience — search, favorites, offline playback, and lock-screen controls — with no subscription, no account, and no third-party streaming service required.
+
+<Note>
+  DiegoMusic is self-hosted software. The mobile app cannot function on its own — you must deploy the backend server before installing the app on your device. See the [deployment guide](/deployment/backend) to get started.
+</Note>
+
+## Architecture overview
+
+DiegoMusic is split into two independent parts that work together. The mobile app handles the user interface and media playback. The backend handles all communication with YouTube, including search, audio extraction, and video streaming.
+
+<CardGroup cols={2}>
+  <Card title="Mobile app" icon="mobile" href="/quickstart">
+    A React Native app (v3.0.0) built with Expo. Runs on iOS and Android. Handles playback, offline storage, search results, and the user interface.
+  </Card>
+  <Card title="Backend server" icon="server" href="/deployment/backend">
+    A Node.js server (v1.1.0) that wraps yt-dlp and FFmpeg. Accepts search and stream requests from the app and proxies YouTube content. Deployed with Docker.
+  </Card>
+</CardGroup>
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Home feed" icon="house" href="/features/home">
+    See your eight most recently played tracks and get song recommendations based on your saved artists.
+  </Card>
+  <Card title="Player" icon="play" href="/features/player">
+    Full-featured player with queue management, shuffle, sleep timer, repeat, and music video playback.
+  </Card>
+  <Card title="Search" icon="magnifying-glass" href="/features/search">
+    Search by song title, artist name, or genre. Results are sourced directly from YouTube.
+  </Card>
+  <Card title="Favorites and offline" icon="heart" href="/features/favorites">
+    Save any song to your favorites and listen without an internet connection.
+  </Card>
+  <Card title="Lock screen controls" icon="lock" href="/features/player">
+    Control playback from the iOS or Android lock screen and notification shade without opening the app.
+  </Card>
+  <Card title="Multi-language support" icon="globe" href="/features/settings">
+    The app interface is available in multiple languages. Change your preferred language in Settings.
+  </Card>
+</CardGroup>
+
+## Technology stack
+
+| Component | Technology | Version |
+|---|---|---|
+| Mobile app | Expo / React Native | 3.0.0 |
+| Backend server | Node.js + Express | 1.1.0 |
+| Audio/video extraction | yt-dlp | latest |
+| Audio processing | FFmpeg (via ffmpeg-static) | bundled |
+| Containerization | Docker + Docker Compose | — |
+| Routing | Expo Router | ~6.0.23 |
+| Language | TypeScript (app), JavaScript ESM (backend) | — |
+
+The backend Dockerfile installs FFmpeg and yt-dlp at build time, so the Docker image is fully self-contained. No external media services or API keys are required beyond optional YouTube browser cookies.

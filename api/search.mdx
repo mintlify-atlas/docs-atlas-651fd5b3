@@ -1,0 +1,163 @@
+---
+title: "Search API — find songs, artists, and music channels"
+description: "Search YouTube by keyword or retrieve a channel's full video library using the DiegoMusic search endpoints. Returns titles, thumbnails, and duration."
+---
+
+The search endpoints let you find YouTube videos by keyword or retrieve the full video library for a channel. Both endpoints are used by the mobile app's search screen and artist pages, and results are cached client-side to avoid redundant requests.
+
+## GET /youtube/search/video
+
+Search YouTube for videos matching a keyword query. Returns an array of video objects sorted by relevance.
+
+### Request parameters
+
+<ParamField query="search" type="string" required>
+  The search query string. URI-encode the value before sending. For example, `Taylor Swift` becomes `Taylor%20Swift`.
+</ParamField>
+
+<ParamField query="limit" type="integer">
+  Maximum number of results to return. The backend slices the result array to this value. If omitted, all results from the first search page are returned (typically up to 20).
+</ParamField>
+
+### Response
+
+Returns a JSON array of video objects.
+
+<ResponseField name="id" type="string">
+  YouTube video ID. Use this to construct the full video URL: `https://www.youtube.com/watch?v={id}`.
+</ResponseField>
+
+<ResponseField name="title" type="string">
+  Video title as it appears on YouTube.
+</ResponseField>
+
+<ResponseField name="thumbnail" type="object">
+  <Expandable title="properties">
+    <ResponseField name="url" type="string">
+      Best available thumbnail URL for the video.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="channel" type="object">
+  <Expandable title="properties">
+    <ResponseField name="name" type="string">
+      Channel display name. Falls back to `"Unknown"` if unavailable.
+    </ResponseField>
+    <ResponseField name="id" type="string">
+      YouTube channel ID.
+    </ResponseField>
+    <ResponseField name="icon" type="string">
+      URL to the channel's avatar image.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="duration_formatted" type="string">
+  Human-readable video duration, e.g. `"3:45"`. Falls back to `"00:00"` if unavailable.
+</ResponseField>
+
+### Example
+
+```bash
+curl "http://your-server:3000/api/youtube/search/video?search=Taylor%20Swift&limit=5"
+```
+
+```json
+[
+  {
+    "id": "dQw4w9WgXcQ",
+    "title": "Taylor Swift - Anti-Hero (Official Music Video)",
+    "thumbnail": {
+      "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
+    },
+    "channel": {
+      "name": "Taylor Swift",
+      "id": "UCqECaJ8Gagnn7YCbPEzWH6g",
+      "icon": "https://yt3.ggpht.com/example-avatar.jpg"
+    },
+    "duration_formatted": "3:21"
+  }
+]
+```
+
+---
+
+## GET /youtube/search/channel/videos
+
+Retrieve the most popular videos from a YouTube channel. The backend resolves channel handles and URLs to canonical channel IDs automatically.
+
+### Request parameters
+
+<ParamField query="channelId" type="string" required>
+  YouTube channel ID, handle (e.g. `@TaylorSwift`), or channel URL. The backend normalizes all formats to a canonical channel ID before fetching videos.
+</ParamField>
+
+### Response
+
+Returns a JSON array of up to 40 video objects sorted by popularity.
+
+<ResponseField name="videoId" type="string">
+  YouTube video ID.
+</ResponseField>
+
+<ResponseField name="title" type="string">
+  Video title.
+</ResponseField>
+
+<ResponseField name="author" type="string">
+  Channel or artist name.
+</ResponseField>
+
+<ResponseField name="authorId" type="string">
+  YouTube channel ID for the video's author.
+</ResponseField>
+
+<ResponseField name="durationText" type="string">
+  Human-readable video duration, e.g. `"4:12"`.
+</ResponseField>
+
+<ResponseField name="videoThumbnails" type="array">
+  Array of thumbnail objects at different resolutions.
+  <Expandable title="thumbnail object properties">
+    <ResponseField name="url" type="string">
+      Thumbnail image URL.
+    </ResponseField>
+    <ResponseField name="width" type="integer">
+      Thumbnail width in pixels.
+    </ResponseField>
+    <ResponseField name="height" type="integer">
+      Thumbnail height in pixels.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Example
+
+```bash
+curl "http://your-server:3000/api/youtube/search/channel/videos?channelId=UCqECaJ8Gagnn7YCbPEzWH6g"
+```
+
+```json
+[
+  {
+    "videoId": "dQw4w9WgXcQ",
+    "title": "Anti-Hero (Official Music Video)",
+    "author": "Taylor Swift",
+    "authorId": "UCqECaJ8Gagnn7YCbPEzWH6g",
+    "durationText": "3:21",
+    "videoThumbnails": [
+      {
+        "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+        "width": 480,
+        "height": 360
+      }
+    ]
+  }
+]
+```

@@ -1,0 +1,43 @@
+---
+title: "Search — find songs and artists or browse by genre"
+description: "Find any song or artist by typing a query, or browse curated genre cards that surface popular tracks from matching YouTube channels."
+---
+
+The Search tab is your starting point for discovering new music or finding something specific. It gives you two ways to find tracks: a free-text search bar for songs and artists, and a grid of genre cards for browsing by category. Both flows ultimately open the same in-app overlays that let you start playback with a single tap.
+
+## Searching for songs and artists
+
+Tap the search bar at the top of the Search tab to open the search overlay. Start typing — results appear automatically after a brief debounce delay once your query is longer than three characters.
+
+Each result card shows:
+
+| Field | Description |
+|-------|-------------|
+| **Thumbnail** | Video or channel thumbnail |
+| **Title** | Song or video title |
+| **Artist** | YouTube channel name |
+| **Duration** | Formatted track length (e.g., `3:45`) |
+
+Tap any result to play it immediately. DiegoMusic also fetches additional videos from that song's channel and queues them up automatically, so playback continues seamlessly after the selected track ends.
+
+Your last **10 search queries** are saved as recent searches and appear below the search bar when no query is active. Tap a recent item to re-run the search instantly, or tap the **X** icon next to an entry to remove it. Use **Clear all** to wipe the full history.
+
+<Tip>
+  Search results are cached in memory for up to 50 unique queries during a session. If you search for the same term twice, the second request returns instantly from cache — no network round-trip required.
+</Tip>
+
+## Browsing by genre
+
+Below the search bar, the Search tab shows a grid of color-coded **genre cards** — one for each music category (pop, rock, hip-hop, electronic, and more). Each card displays the genre name and a representative image.
+
+Tap a genre card to open the **genre overlay**, a full-screen panel that loads popular songs from a YouTube channel associated with that genre. The overlay fetches the channel's videos and presents them as a scrollable song list. Tap any song to start playing.
+
+The genre overlay uses the same channel-video fetching mechanism as the search results queue, so tapping a song from a genre channel automatically builds a queue of songs from that same channel.
+
+## Search results
+
+When you type a query, results display in a scrollable list inside the search overlay. While results are loading, DiegoMusic shows skeleton placeholder rows so the interface never appears empty.
+
+If no results are found for your query, the overlay shows a **no results** message with a suggestion to try a different term.
+
+The search overlay stays open while you adjust your query — the results list updates live as you type. Tap **Cancel** or swipe down to close the overlay and return to the genre grid.

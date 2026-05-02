@@ -1,0 +1,63 @@
+---
+title: "DiegoMusic REST API — overview and base conventions"
+description: "A complete reference overview of the DiegoMusic REST API: base URL, authentication model, all available endpoints, and response format conventions."
+---
+
+The DiegoMusic backend exposes a REST API at `/api` for searching YouTube, streaming audio, and proxying video. The mobile app uses this API exclusively — every search, playback request, and prefetch call goes through these endpoints.
+
+## Base URL
+
+```
+http://your-server:3000/api
+```
+
+Replace `your-server` with the hostname or IP address of the machine running the backend. The default port is `3000` and can be overridden with the `PORT` environment variable.
+
+The mobile app reads the base URL from the `EXPO_PUBLIC_API_URL` environment variable. See the [configuration guide](/deployment/configuration) for details.
+
+## Authentication
+
+No authentication is required. The API is designed for private, self-hosted use on a trusted network. Do not expose the backend to the public internet without adding your own authentication layer.
+
+## All endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/youtube/search/video` | Search YouTube for videos by keyword |
+| `GET` | `/youtube/search/channel/videos` | Get videos from a YouTube channel |
+| `GET` | `/youtube/audio/download` | Download and stream audio as M4A |
+| `GET` | `/youtube/audio/url` | Get a direct audio stream URL |
+| `GET` | `/youtube/audio/prefetch` | Warm the audio cache for a URL |
+| `GET` | `/youtube/video/stream` | Stream or redirect to a video |
+| `GET` | `/status` | Health check endpoint |
+
+## Response format
+
+All endpoints return JSON unless they are streaming binary data. Successful responses use standard HTTP `2xx` status codes.
+
+**Error responses** use the following shape with an appropriate HTTP status code (`400`, `500`, etc.):
+
+```json
+{
+  "error": "message describing what went wrong"
+}
+```
+
+Audio and video endpoints stream binary data (`audio/mp4`, `video/mp4`, or `video/webm`) instead of JSON. They support HTTP Range requests so the mobile player can seek without re-downloading the full file.
+
+---
+
+<CardGroup cols={2}>
+  <Card title="Search API" icon="magnifying-glass" href="/api/search">
+    Search YouTube by keyword or browse a channel's video library.
+  </Card>
+  <Card title="Audio API" icon="music" href="/api/audio">
+    Stream and download M4A audio, with caching and seek support.
+  </Card>
+  <Card title="Video API" icon="video" href="/api/video">
+    Stream music videos at low, medium, or high quality.
+  </Card>
+  <Card title="Status API" icon="heart-pulse" href="/api/status">
+    Health check endpoint for uptime monitoring.
+  </Card>
+</CardGroup>

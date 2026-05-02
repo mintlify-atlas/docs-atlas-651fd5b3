@@ -1,0 +1,118 @@
+---
+title: "Set up, run, and build DiegoMusic for iOS and Android"
+description: "Set up, run, and build the DiegoMusic Expo app for iOS, Android, or web, then connect it to your self-hosted backend for streaming."
+---
+
+The DiegoMusic mobile app is built with [Expo](https://expo.dev) (React Native) and runs on iOS, Android, and the web. It communicates with your self-hosted backend over HTTP, so you need a running backend instance before the app can stream music. The app version in this repository is **3.0.0** and targets Expo SDK 54.
+
+## Prerequisites
+
+- **Node.js 20+** — [nodejs.org](https://nodejs.org)
+- **Expo CLI** — install globally with `npm install -g expo-cli`, or use `npx expo` without a global install
+- **For iOS builds** — macOS with Xcode installed and a valid Apple Developer account
+- **For Android builds** — Android Studio with the Android SDK and an emulator or connected device
+
+## Development setup
+
+<Steps>
+  <Step title="Navigate to the app directory">
+    ```bash
+    cd diegoMusic-alternative-spotify/diegoMusic
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    ```bash
+    npm install
+    ```
+  </Step>
+
+  <Step title="Copy the environment file">
+    ```bash
+    cp .env.example .env
+    ```
+  </Step>
+
+  <Step title="Set your backend URL">
+    Open `.env` and set `EXPO_PUBLIC_API_URL` to the address of your running backend, including the `/api` path:
+
+    ```bash
+    EXPO_PUBLIC_API_URL=http://192.168.1.100:3000/api
+    ```
+
+    Replace `192.168.1.100` with your server's actual IP address. See [Environment variable](#environment-variable) below for details.
+  </Step>
+
+  <Step title="Start the development server">
+    ```bash
+    npx expo start
+    ```
+  </Step>
+
+  <Step title="Open the app on your device">
+    Install the **Expo Go** app on your iOS or Android device, then scan the QR code printed in the terminal. The app will load and connect to your backend.
+  </Step>
+</Steps>
+
+## Running on a specific platform
+
+<CodeGroup>
+
+```bash iOS Simulator
+npx expo run:ios
+```
+
+```bash Android Emulator
+npx expo run:android
+```
+
+```bash Web
+npx expo start --web
+```
+
+</CodeGroup>
+
+Running `expo run:ios` or `expo run:android` performs a native build and installs it directly on a simulator or connected device. This is required when testing native modules that Expo Go does not support.
+
+## Production build
+
+For distributing the app outside of Expo Go, use **EAS Build** (Expo Application Services), which builds native binaries in the cloud.
+
+1. Install the EAS CLI:
+
+   ```bash
+   npm install -g eas-cli
+   ```
+
+2. Log in to your Expo account and configure the project:
+
+   ```bash
+   eas login
+   eas build:configure
+   ```
+
+3. Trigger a build:
+
+   ```bash
+   # iOS (.ipa)
+   eas build --platform ios
+
+   # Android (.apk or .aab)
+   eas build --platform android
+   ```
+
+EAS Build requires a free [Expo account](https://expo.dev/signup). iOS builds additionally require an Apple Developer Program membership to generate the necessary signing certificates.
+
+## Environment variable
+
+| Variable | Default | Description |
+|---|---|---|
+| `EXPO_PUBLIC_API_URL` | `http://127.0.0.1:3000/api` | The full base URL of the backend API. Must be reachable from the device or simulator. |
+
+<Warning>
+  `http://localhost:3000` will **not** work on a physical device. The device is on your network and cannot resolve `localhost` to your development machine. Use your machine's local IP address (e.g., `http://192.168.1.x:3000/api`) or a publicly accessible URL instead.
+</Warning>
+
+<Note>
+  When testing on a device connected to the same Wi-Fi network as your development machine, find your local IP with `ipconfig` (Windows) or `ifconfig` / `ip addr` (macOS/Linux) and use that address as the host.
+</Note>

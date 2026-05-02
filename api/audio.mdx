@@ -1,0 +1,122 @@
+---
+title: "Audio API — stream, download, and prefetch M4A audio"
+description: "Extract and stream M4A audio from YouTube videos, retrieve direct CDN stream URLs, and pre-warm the audio cache to ensure seamless gapless playback."
+---
+
+The audio endpoints extract and serve M4A audio from YouTube videos. The backend uses yt-dlp with the format selector `ba[ext=m4a]/ba/best` to prefer native M4A streams, falling back to the best available audio track when M4A is not available.
+
+## GET /youtube/audio/url
+
+Returns a direct CDN URL for the audio stream of a YouTube video. The mobile player uses this URL to stream audio directly from YouTube's CDN, bypassing the backend for the actual bytes.
+
+### Request parameters
+
+<ParamField query="url" type="string" required>
+  Full YouTube video URL. Example: `https://www.youtube.com/watch?v=dQw4w9WgXcQ`
+</ParamField>
+
+### Response
+
+<ResponseField name="url" type="string">
+  Direct CDN URL to the audio stream. This URL is valid for approximately 6 hours (YouTube's CDN TTL) but the backend cache expires after 4 hours to stay within that window.
+</ResponseField>
+
+<ResponseField name="mimeType" type="string">
+  Always `"audio/mp4"` for M4A streams.
+</ResponseField>
+
+### Caching
+
+Results are cached in memory for 4 hours (`URL_CACHE_TTL = 4 * 60 * 60 * 1000` ms). The cache key is derived from the YouTube video ID, so requesting the same video with different URL formats (e.g. shortened URLs) still hits the cache.
+
+### Example
+
+```bash
+curl "http://your-server:3000/api/youtube/audio/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ"
+```
+
+```json
+{
+  "url": "https://rr3---sn-example.googlevideo.com/videoplayback?expire=...&mime=audio%2Fmp4&...",
+  "mimeType": "audio/mp4"
+}
+```
+
+---
+
+## GET /youtube/audio/download
+
+Downloads the audio for a YouTube video and streams the resulting M4A file back to the client. This endpoint is used by the mobile player when direct CDN streaming is not possible or when a specific start offset is needed.
+
+### Request parameters
+
+<ParamField query="url" type="string" required>
+  Full YouTube video URL. Example: `https://www.youtube.com/watch?v=dQw4w9WgXcQ`
+</ParamField>
+
+<ParamField query="start" type="integer" default="0">
+  Start offset in seconds. When greater than `0`, yt-dlp uses `--download-sections *{start}-inf` to download only the portion of the audio from this point forward. Defaults to `0` (full file).
+</ParamField>
+
+### Response
+
+Returns a binary audio stream (`audio/mp4`). The response always includes `Accept-Ranges: bytes`, and supports HTTP Range requests for seeking.
+
+| Condition | Status | Description |
+|-----------|--------|-------------|
+| No `Range` header | `200 OK` | Full file streamed from the beginning |
+| `Range` header present | `206 Partial Content` | Partial content with `Content-Range` and `Content-Length` headers |
+
+<Note>
+  The `Accept-Ranges: bytes` header in every response enables native audio seeking in the mobile player. The player sends `Range` requests to jump to a timestamp without re-downloading from the start.
+</Note>
+
+### Example
+
+```bash
+# Stream full audio
+curl "http://your-server:3000/api/youtube/audio/download?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ" \
+  --output song.m4a
+
+# Stream from 60 seconds in
+curl "http://your-server:3000/api/youtube/audio/download?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ&start=60" \
+  --output song-from-60s.m4a
+
+# Range request for seeking
+curl "http://your-server:3000/api/youtube/audio/download?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ" \
+  -H "Range: bytes=0-1048575" \
+  --output chunk.m4a
+```
+
+---
+
+## GET /youtube/audio/prefetch
+
+Pre-warms the audio URL cache for a YouTube video without blocking the caller. The backend triggers `getAudioDirectUrl()` asynchronously in the background and returns `202 Accepted` immediately.
+
+### Request parameters
+
+<ParamField query="url" type="string" required>
+  Full YouTube video URL to pre-warm in cache.
+</ParamField>
+
+### Response
+
+Returns `202 Accepted` with an empty body. Any errors during the background fetch are logged server-side and do not affect the response.
+
+### Example
+
+The mobile app calls prefetch for the next song in the queue as soon as the current song starts playing, so the URL is ready before it is needed:
+
+```bash
+# Fire-and-forget — called by the app for the next song in queue
+curl -s -o /dev/null -w "%{http_code}" \
+  "http://your-server:3000/api/youtube/audio/prefetch?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ"
+# 202
+```
+
+```typescript
+// Mobile app usage (services/api.ts)
+youtubeService.prefetchAudio(nextSong.url);
+// Returns void — no await needed
+```

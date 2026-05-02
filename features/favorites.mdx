@@ -1,0 +1,48 @@
+---
+title: "Favorites — save and play your songs while offline"
+description: "Save songs to your device for offline listening, manage your favorite artists, and browse your full saved-songs library from a dedicated tab."
+---
+
+The Favorites feature lets you build a personal library of songs that plays without an internet connection. When you save a song, DiegoMusic downloads both the audio and its thumbnail to your device, so the full listening experience — including artwork on the lock screen — remains available even when you have no signal.
+
+<Note>
+  Saved songs are stored in the app's **document directory** on your device. This is a private, sandboxed location managed by the operating system. The files persist across app restarts but are removed if you uninstall the app.
+</Note>
+
+## Saving a song as a favorite
+
+While a song is playing, tap the **heart icon** in the expanded player to save it. DiegoMusic immediately:
+
+1. Downloads the audio file (as an `.mp3`) to the device document directory using the `/api/youtube/audio/download` endpoint.
+2. Downloads the song thumbnail as a `.jpg` (used for lock-screen artwork and the favorites list).
+3. Adds the song to your favorites list, which persists in local storage under the key `@favorites_songs`.
+
+The heart icon turns blue to confirm the song is saved. Tap it again to remove the song from your favorites and delete the local files.
+
+<Warning>
+  Every saved song consumes space in your device's local storage. Audio files vary in size depending on track length. Remove favorites you no longer need to free up space — tap the heart icon in the expanded player or use the Favorites tab to manage your library.
+</Warning>
+
+## Playing favorites offline
+
+DiegoMusic detects your network status via `NetworkContext`. When the device is offline, saved songs play directly from local storage with no buffering. Favorites that have already been downloaded behave identically online and offline — the app reads from the local file rather than streaming.
+
+Songs that have **not** been saved as favorites require an active internet connection to stream. If the device goes offline mid-stream for a non-favorite song, playback may stop or stall.
+
+## Saving favorite artists
+
+To save an artist, open the expanded player while a song from that artist is playing and tap the **save-artist icon** (a person silhouette with a plus symbol). The artist is added to your favorites list and will appear in the **Favorite artists** section on the [home screen](/features/home).
+
+You can also tap the artist name in the expanded player to open an artist channel overlay. From there you can browse the artist's songs and save them individually as favorites.
+
+## Managing favorites
+
+The **Favorites tab** (the heart icon in the bottom navigation) shows all of your saved songs in reverse chronological order — the most recently saved song appears first.
+
+From this tab you can:
+
+- **Search your library** — type in the filter bar at the top to narrow the list by song title or artist name. The filter updates the list in real time as you type.
+- **Play a song** — tap any song row to start playback. The full queue is set to your filtered favorites list, so playback continues through your library.
+- **Play** — tap the large play button in the bottom-right area to start from the first song in the list. If shuffle mode is active when you tap play, a random song from your favorites is chosen as the starting point instead.
+
+When your favorites list is empty (or no songs match the current filter), the tab shows an empty state with a heart outline and a prompt to start saving songs.

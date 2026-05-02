@@ -1,81 +1,142 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
-icon: 'rocket'
+title: "Quickstart: deploy DiegoMusic from scratch to first song"
+description: "Deploy the self-hosted Node.js backend with Docker, configure the mobile app, and start streaming music from YouTube on iOS or Android."
 ---
 
-## Get started in three steps
+This guide walks you through everything you need to go from zero to streaming. By the end, you will have the backend running in Docker, the mobile app connected to it, and your first song playing.
 
-Get your documentation site running locally and make your first customization.
+<Warning>
+  YouTube may rate-limit or block requests from your backend if you do not provide a `cookies.txt` file. This is especially likely in production. See the [configuration guide](/deployment/configuration) for instructions on how to export your browser cookies and mount them into the container.
+</Warning>
 
-### Step 1: Set up your local environment
+<Steps>
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+<Step title="Prerequisites">
 
-### Step 2: Deploy your changes
+Make sure you have the following installed before continuing:
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+- **Docker** and **Docker Compose** — used to run the backend server
+- **Node.js 20+** — required to install and run the Expo CLI
+- **Expo CLI** or the **Expo Go** app on your phone — used to run the mobile app
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+You will also need a `cookies.txt` file containing browser cookies exported from a logged-in YouTube session. This file tells yt-dlp to behave like a real browser, reducing the chance of YouTube blocking your requests. You do not need it to get started locally, but plan to add it before using DiegoMusic in production.
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+</Step>
 
-### Step 3: Go live
+<Step title="Deploy the backend">
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+Clone the repository and navigate to the backend directory:
 
-## Next steps
+<CodeGroup>
 
-Now that you have your docs running, explore these key features:
+```bash Clone and enter the backend
+git clone https://github.com/juanramirez871/diegoMusic-alternative-spotify.git
+cd diegoMusic-alternative-spotify/backend
+```
 
-<CardGroup cols={2}>
+</CodeGroup>
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
+The `docker-compose.yml` is already configured and ready to use:
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+```yaml docker-compose.yml
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: diego-music-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+    volumes:
+      - ./temp:/tmp
+    restart: unless-stopped
+```
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
+Start the backend with Docker Compose:
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
+<CodeGroup>
 
-</CardGroup>
+```bash Start the backend
+docker-compose up -d
+```
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+</CodeGroup>
+
+Once the container starts, you should see the following log message confirming the server is running:
+
+```
+Server is running on port 3000 (ɔ◔‿◔)ɔ ♥
+```
+
+You can verify this by running `docker logs diego-music-backend`.
+
+<Tip>
+  If you are running the backend on a remote server or a separate machine on your network, make sure port 3000 is reachable from your phone. You can use ngrok (`ngrok http 3000`) to expose the backend over the internet during development, which lets any device connect to it using the generated public URL.
+</Tip>
+
+</Step>
+
+<Step title="Configure the mobile app">
+
+Open a new terminal and navigate to the mobile app directory:
+
+<CodeGroup>
+
+```bash Set up the app environment
+cd ../diegoMusic
+cp .env.example .env
+```
+
+</CodeGroup>
+
+Open `.env` and set `EXPO_PUBLIC_API_URL` to the address of your running backend. Replace `YOUR_SERVER_IP` with the actual IP address or hostname of the machine running Docker:
+
+```bash .env
+EXPO_PUBLIC_API_URL=http://YOUR_SERVER_IP:3000/api
+```
+
+If you are running both the backend and the app on the same machine for local development, use your machine's local network IP (e.g., `192.168.1.x`) rather than `localhost` — the phone needs a routable address.
+
+</Step>
+
+<Step title="Install dependencies and run">
+
+Install the app's dependencies and start the Expo development server:
+
+<CodeGroup>
+
+```bash Install and start
+npm install
+npx expo start
+```
+
+</CodeGroup>
+
+Expo will display a QR code and a list of options in the terminal. Choose one:
+
+- Press `i` to open in the iOS simulator
+- Press `a` to open in the Android emulator
+- Scan the QR code with the **Expo Go** app on your physical device
+
+</Step>
+
+<Step title="Search for your first song">
+
+Once the app loads on your device:
+
+1. Tap the **Search** tab at the bottom of the screen
+2. Type an artist name or song title into the search bar
+3. Tap any result to start playing
+
+The backend fetches audio from YouTube via yt-dlp and streams it back to your device. The first request for a track may take a few seconds while the audio is extracted.
+
+</Step>
+
+</Steps>
+
+<Check>
+  Your DiegoMusic setup is complete. The backend is running in Docker, the mobile app is connected, and you can search and play any song from YouTube. Next, save a song to **Favorites** to try offline playback, or read the [deployment guide](/deployment/backend) to harden your setup for production use.
+</Check>

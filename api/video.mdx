@@ -1,0 +1,76 @@
+---
+title: "Video API — stream music videos at any quality level"
+description: "Stream YouTube music videos at low, medium, or high quality. Supports HTTP Range requests for seeking and redirects HLS manifests directly to the player."
+---
+
+The video endpoint proxies YouTube music videos to the mobile player. It supports three quality levels and handles both direct MP4 URLs and HLS streams. The resolved URL and its MIME type are cached for 4 hours, matching the audio URL cache TTL.
+
+## GET /youtube/video/stream
+
+Resolve and proxy a YouTube video at the requested quality level. If the resolved URL is an HLS manifest, the endpoint redirects to it instead of proxying the bytes.
+
+### Request parameters
+
+<ParamField query="url" type="string" required>
+  Full YouTube video URL. Example: `https://www.youtube.com/watch?v=dQw4w9WgXcQ`
+</ParamField>
+
+<ParamField query="quality" type="string" default="low">
+  Desired quality level. Accepted values: `low`, `medium`, `high`. Any other value is silently coerced to `low`.
+</ParamField>
+
+### Quality levels
+
+Each quality level maps to a yt-dlp format selector. The selector tries each option in order and uses the first one that resolves successfully.
+
+| Quality | yt-dlp format selector |
+|---------|------------------------|
+| `low` | `18/best[height<=360][ext=mp4]/best[height<=360]/best` |
+| `medium` | `18/22/best[ext=mp4]/best` |
+| `high` | `22/best[height<=1080][ext=mp4][acodec!=none]/best[height<=720][ext=mp4][acodec!=none]/best[ext=mp4]/18/best` |
+
+<Tip>
+  The mobile app defaults to `low` for music videos to save mobile data. Users can change the video quality in **Settings**. Most music video content is visually acceptable at 360p.
+</Tip>
+
+### Response behavior
+
+The response depends on the format YouTube resolves to:
+
+**HLS stream** — when the resolved URL contains `.m3u8` or `manifest.googlevideo`:
+- Returns `302 Found` redirecting to the HLS manifest URL
+- The mobile player follows the redirect and handles HLS natively
+
+**Direct MP4/WebM** — all other formats:
+- Proxies the video bytes with the following response headers:
+
+| Header | Value |
+|--------|-------|
+| `Content-Type` | `video/mp4` or `video/webm` depending on format |
+| `Accept-Ranges` | `bytes` |
+| `Content-Range` | Forwarded from upstream when present |
+| `Content-Length` | Forwarded from upstream when present |
+| `Cache-Control` | `no-store` |
+
+Supports HTTP `Range` requests for video seeking. The backend forwards the `Range` header to the upstream CDN and relays the `206 Partial Content` response back to the client.
+
+### Examples
+
+```bash
+# Low quality (default) — saves data, good for most music videos
+curl "http://your-server:3000/api/youtube/video/stream?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ&quality=low" \
+  --output video-low.mp4
+
+# Medium quality
+curl "http://your-server:3000/api/youtube/video/stream?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ&quality=medium" \
+  --output video-medium.mp4
+
+# High quality (1080p preferred)
+curl "http://your-server:3000/api/youtube/video/stream?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ&quality=high" \
+  --output video-high.mp4
+
+# Range request for video seeking
+curl "http://your-server:3000/api/youtube/video/stream?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ&quality=low" \
+  -H "Range: bytes=0-524287" \
+  --output video-chunk.mp4
+```

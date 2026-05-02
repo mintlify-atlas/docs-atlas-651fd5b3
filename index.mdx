@@ -1,133 +1,61 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
-icon: 'star'
+title: "DiegoMusic: free music streaming for iOS and Android"
+description: "DiegoMusic streams music and music videos from YouTube, with offline favorites, a full-featured player, and no premium subscription required."
 ---
 
-## Setting up
+DiegoMusic is a free, open-source music streaming app for iOS and Android. It sources audio and video from YouTube using a self-hosted backend, giving you Spotify-like features — search, favorites, lock-screen controls, and offline playback — without any subscription fee.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Get the backend running and the app installed in under 10 minutes.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Player" icon="play" href="/features/player">
+    Explore the full-featured player: queue, shuffle, repeat, sleep timer, and more.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Deployment" icon="server" href="/deployment/backend">
+    Deploy the Node.js backend with Docker Compose in minutes.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="API Reference" icon="code" href="/api/overview">
+    Browse the REST API powering audio search, streaming, and video playback.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## What DiegoMusic does
 
-Everything you need to create world-class documentation.
+DiegoMusic is split into two parts: a **React Native mobile app** (built with Expo) and a **Node.js backend** that proxies YouTube content via yt-dlp. The app connects to your self-hosted backend to search for songs, stream audio, and play music videos — all without an account or a paid subscription.
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
+<CardGroup cols={2}>
+  <Card title="Home feed" icon="house" href="/features/home">
+    Recently played tracks and recommendations from your favorite artists.
   </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
+  <Card title="Search" icon="magnifying-glass" href="/features/search">
+    Find any song, artist, or genre and start playing instantly.
   </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
+  <Card title="Favorites and offline" icon="heart" href="/features/favorites">
+    Save songs and listen without an internet connection.
   </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
+  <Card title="Settings" icon="gear" href="/features/settings">
+    Change language, video quality, and other preferences.
   </Card>
-</Columns>
+</CardGroup>
 
-## Make your content agent ready
+## How it works
 
-Make your docs work for humans and AI agents alike.
+<Steps>
+  <Step title="Deploy the backend">
+    Run the Node.js server with Docker Compose. It handles YouTube scraping, audio extraction via yt-dlp, and video streaming.
+  </Step>
+  <Step title="Configure the app">
+    Set `EXPO_PUBLIC_API_URL` in the mobile app to point at your backend server.
+  </Step>
+  <Step title="Install on your device">
+    Build the Expo app for iOS or Android, or run it in the Expo Go client for development.
+  </Step>
+  <Step title="Start listening">
+    Search for any song or artist, tap to play, and save your favorites for offline use.
+  </Step>
+</Steps>
 
-<Columns cols={2}>
-  <Card
-    title="Prompt component"
-    icon="robot"
-    href="/agent-ready/prompt"
-  >
-    Embed shareable AI prompts readers can copy or open in Cursor.
-  </Card>
-  <Card
-    title="Visibility"
-    icon="eye"
-    href="/agent-ready/visibility"
-  >
-    Show different content to humans and agents reading your docs.
-  </Card>
-  <Card
-    title="Contextual menu"
-    icon="bolt"
-    href="/agent-ready/contextual"
-  >
-    Give readers one-click access to Claude, ChatGPT, Cursor, and more.
-  </Card>
-  <Card
-    title="AI coding tools"
-    icon="wand-magic-sparkles"
-    href="/ai-tools/claude-code"
-  >
-    Set up Claude Code, Cursor, or Windsurf with Mintlify's skill.
-  </Card>
-</Columns>
-
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<Note>
+  DiegoMusic requires a self-hosted backend. See the [deployment guide](/deployment/backend) to get it running before installing the app.
+</Note>

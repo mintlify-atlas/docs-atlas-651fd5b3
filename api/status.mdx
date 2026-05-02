@@ -1,0 +1,46 @@
+---
+title: "Status API — backend health check and uptime probe"
+description: "A lightweight health check endpoint that confirms the DiegoMusic backend is running and returns the current server timestamp for uptime monitoring."
+---
+
+The status endpoint provides a simple health check for monitoring the DiegoMusic backend. It requires no parameters and always returns the same structure, making it easy to integrate with uptime monitoring tools.
+
+## GET /api/status
+
+Check that the backend is running and reachable. This endpoint does not interact with yt-dlp, YouTube, or any external service — it only confirms the Node.js process is alive and accepting requests.
+
+### Request parameters
+
+None.
+
+### Response
+
+<ResponseField name="status" type="string">
+  Always `"UP"` when the server is running.
+</ResponseField>
+
+<ResponseField name="timestamp" type="string">
+  ISO 8601 timestamp of when the request was handled, e.g. `"2024-11-15T14:32:00.000Z"`.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Human-readable confirmation message. Always `"Server is running :)"`.
+</ResponseField>
+
+### Example
+
+```bash
+curl "http://your-server:3000/api/status"
+```
+
+```json
+{
+  "status": "UP",
+  "timestamp": "2024-11-15T14:32:00.123Z",
+  "message": "Server is running :)"
+}
+```
+
+<Note>
+  This endpoint is well-suited for uptime monitoring tools such as [Uptime Kuma](https://github.com/louislam/uptime-kuma) or [Better Uptime](https://betterstack.com/better-uptime). Point your monitor at `http://your-server:3000/api/status` and check that the response body contains `"status":"UP"` with an HTTP `200` status code.
+</Note>

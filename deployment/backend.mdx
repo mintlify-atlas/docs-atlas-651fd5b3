@@ -1,0 +1,147 @@
+---
+title: "Deploy the DiegoMusic Node.js backend with Docker"
+description: "Run the DiegoMusic Node.js API server using Docker Compose or manually with Node.js, yt-dlp, and FFmpeg on any Linux or macOS host."
+---
+
+The DiegoMusic backend is a Node.js + Express server that uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) and FFmpeg to fetch and stream audio from YouTube. It exposes a REST API under `/api` and a health-check route at `/`. Docker is the recommended deployment method because it bundles all system dependencies—FFmpeg, yt-dlp, and Deno—into a single, reproducible image.
+
+## Prerequisites
+
+- Docker and Docker Compose v2 (`docker compose version`)
+- A server or machine with outbound internet access (required to reach YouTube)
+- Optional: a `cookies.txt` file for authenticated YouTube requests (see [Configuration](/deployment/configuration))
+
+## Docker Compose deployment (recommended)
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/juanramirez871/diegoMusic-alternative-spotify.git
+    ```
+  </Step>
+
+  <Step title="Navigate to the backend directory">
+    ```bash
+    cd diegoMusic-alternative-spotify/backend
+    ```
+  </Step>
+
+  <Step title="Add cookies.txt (optional)">
+    If you have a Netscape-format cookies file exported from a YouTube session, copy it to this directory:
+
+    ```bash
+    cp /path/to/your/cookies.txt ./cookies.txt
+    ```
+
+    The server detects this file at startup and passes it to every yt-dlp call automatically. See [YouTube cookies setup](/deployment/configuration#youtube-cookies-setup) for instructions on how to export one.
+  </Step>
+
+  <Step title="Start the server">
+    ```bash
+    docker-compose up -d
+    ```
+
+    Docker will build the image on the first run. Subsequent starts reuse the cached image.
+  </Step>
+
+  <Step title="Verify the server is running">
+    ```bash
+    curl http://localhost:3000/
+    ```
+
+    Expected response:
+
+    ```json
+    {"message":"Welcome to Diego Music API"}
+    ```
+  </Step>
+</Steps>
+
+## Manual (non-Docker) setup
+
+<Steps>
+  <Step title="Install system requirements">
+    You need the following tools available in your `PATH` before installing Node dependencies:
+
+    - **Node.js 20+** — [nodejs.org](https://nodejs.org)
+    - **yt-dlp** — [github.com/yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp/releases)
+    - **FFmpeg** — available via most package managers (`apt install ffmpeg`, `brew install ffmpeg`, etc.)
+    - **Deno** — [deno.land](https://deno.land) (used by yt-dlp's JS runtime; the server locates it via `which deno`)
+  </Step>
+
+  <Step title="Install Node dependencies">
+    ```bash
+    npm install
+    ```
+  </Step>
+
+  <Step title="Configure the environment">
+    Copy the example file and set the port:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+    Edit `.env`:
+
+    ```bash
+    PORT=3000
+    ```
+  </Step>
+
+  <Step title="Start the server">
+    For production:
+
+    ```bash
+    npm start
+    ```
+
+    For development with hot-reload (uses `node --watch`):
+
+    ```bash
+    npm run dev
+    ```
+  </Step>
+</Steps>
+
+## Docker image details
+
+The image is based on `node:20-alpine`. The build installs system packages and downloads both yt-dlp and Deno as standalone binaries.
+
+```dockerfile
+FROM node:20-alpine
+
+RUN apk add --no-cache \
+    ffmpeg \
+    python3 \
+    py3-pip \
+    ca-certificates \
+    curl \
+    bash
+
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp && \
+    chmod a+rx /usr/local/bin/yt-dlp
+
+RUN curl -fsSL https://deno.land/x/install/install.sh | sh && \
+    mv /root/.deno/bin/deno /usr/local/bin/deno
+
+WORKDIR /app
+COPY package*.json ./
+
+RUN npm install --omit=dev
+COPY . .
+
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+## Ports and volumes
+
+| Resource | Value | Description |
+|---|---|---|
+| Port | `3000` | The HTTP port the Express server listens on. Override with the `PORT` environment variable. |
+| Volume | `./temp:/tmp` | Maps a local `temp/` directory to the container's `/tmp` for temporary audio files. |
+
+<Warning>
+  The server downloads audio to `/tmp` as temporary `.m4a` files during streaming. Each file is cached in memory for **10 minutes** and then deleted automatically. Make sure the volume mount is writable and has sufficient free space for concurrent downloads.
+</Warning>

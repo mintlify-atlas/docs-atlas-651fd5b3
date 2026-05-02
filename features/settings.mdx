@@ -1,0 +1,34 @@
+---
+title: "Settings — configure your language and video quality"
+description: "Change the app language between English, Spanish, and Japanese, and set the video streaming quality to balance clarity and data usage."
+---
+
+The Settings screen lets you configure two global preferences: the display language and the video quality used when playing music videos. Both settings take effect immediately — you do not need to restart the app. Open Settings by tapping the gear icon in the bottom tab navigation.
+
+## Language
+
+DiegoMusic supports three languages. Tap your preferred option to switch the entire app interface — all labels, button text, empty states, and error messages update instantly.
+
+| Language | Display name |
+|----------|-------------|
+| English | English |
+| Spanish | Español |
+| Japanese | 日本語 |
+
+The selected language is saved locally so your choice persists across app restarts. A blue checkmark appears next to the active language. The language preference is stored under the key `@app_language` in local storage.
+
+## Video quality
+
+The video quality setting controls the format selector passed to yt-dlp on the backend when you request a music video. Choose a quality level that balances visual clarity with your available bandwidth.
+
+| Setting | Resolution | When to use |
+|---------|-----------|-------------|
+| **Low** | 360p | Slow connections or when saving mobile data |
+| **Medium** | 480p | A balance of quality and data usage |
+| **High** | 1080p | Wi-Fi connections where data usage is not a concern |
+
+The active quality level is highlighted with a blue checkmark and the corresponding signal-strength icon. Your selection is applied the next time you open a video — it does not restart any video that is already playing.
+
+<Tip>
+  Select **Low** or **Medium** when streaming videos over mobile data. A 360p stream uses significantly less data than 1080p and still plays smoothly on most connections.
+</Tip>

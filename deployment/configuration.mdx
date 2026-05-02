@@ -1,0 +1,90 @@
+---
+title: "Configure DiegoMusic: environment and YouTube cookies"
+description: "Reference for all environment variables and the cookies.txt setup needed to run DiegoMusic reliably in production with YouTube access."
+---
+
+Running DiegoMusic in production requires two things beyond a basic install: correct environment variables for both the backend and the app, and a valid `cookies.txt` file so yt-dlp can make authenticated requests to YouTube without being blocked. This page covers all configuration options and how the caching layers work.
+
+## Backend environment variables
+
+Set these in a `.env` file in the `backend/` directory, or pass them directly through your deployment environment (e.g., via `docker-compose.yml`).
+
+| Variable | Default | Description |
+|---|---|---|
+| `PORT` | `3000` | The port the Express server listens on. |
+| `NODE_ENV` | — | Set to `production` for production deployments. Affects error reporting behavior. |
+
+## Mobile app environment variables
+
+Set these in a `.env` file in the `diegoMusic/` directory before building or starting the dev server.
+
+| Variable | Default | Description |
+|---|---|---|
+| `EXPO_PUBLIC_API_URL` | `http://127.0.0.1:3000/api` | The full base URL of the backend API, including the `/api` path. Must be accessible from the device or emulator. |
+
+## YouTube cookies setup
+
+Providing a `cookies.txt` file is the most important step for running DiegoMusic reliably in production. Without it, YouTube's bot-detection systems will throttle or block requests, causing streams to fail.
+
+**What is `cookies.txt`?**
+A Netscape-format cookie file exported from a real, logged-in YouTube session. It proves to YouTube that requests are coming from an authenticated browser rather than an automated script.
+
+**Why is it needed?**
+YouTube detects automated requests and applies rate limits or hard blocks, especially under sustained usage. A valid session cookie bypasses these checks.
+
+**How to create one:**
+
+<Steps>
+  <Step title="Install a cookie export extension">
+    Install the **Get cookies.txt LOCALLY** extension for [Chrome](https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc) or a similar extension for Firefox.
+  </Step>
+
+  <Step title="Log into YouTube">
+    Open [youtube.com](https://youtube.com) and sign in with your Google account.
+  </Step>
+
+  <Step title="Export the cookies">
+    Click the extension icon while on youtube.com and export the cookies as a **Netscape-format `.txt` file**.
+  </Step>
+
+  <Step title="Place the file in the backend directory">
+    Copy the exported file to `backend/cookies.txt`:
+
+    ```bash
+    cp ~/Downloads/cookies.txt ./backend/cookies.txt
+    ```
+
+    The backend checks for this path at startup using:
+
+    ```javascript
+    const cookiesPath = path.join(process.cwd(), "cookies.txt");
+    ```
+
+    When found, it appends `--cookies cookies.txt` to every yt-dlp invocation automatically.
+  </Step>
+</Steps>
+
+<Warning>
+  Without `cookies.txt`, YouTube may throttle or block requests, especially in production environments with sustained usage. Streams will return errors or fail silently. Adding a cookies file is strongly recommended for any deployment beyond local testing.
+</Warning>
+
+<Note>
+  YouTube session cookies expire periodically. If you start seeing playback failures after the server was working correctly, regenerate and replace `cookies.txt` with a fresh export.
+</Note>
+
+## Audio and video caching
+
+The backend has two built-in caching layers to reduce redundant yt-dlp calls and minimize latency.
+
+**URL cache (in-memory)**
+After yt-dlp resolves a YouTube URL to a direct audio or video stream URL, that result is cached in memory with a **4-hour TTL** (`URL_CACHE_TTL = 4 * 60 * 60 * 1000` ms). Subsequent requests for the same video within that window return the cached URL immediately without spawning a new yt-dlp process.
+
+**Download cache (temporary files)**
+When audio is downloaded to disk (e.g., for seeking), the `.m4a` file is written to `/tmp` and its path is held in a download cache. The file is deleted automatically after **10 minutes**. The Docker Compose setup mounts `./temp:/tmp` so these files are written to a known local directory.
+
+**Search cache (mobile app)**
+The app holds up to **50 recent search results** in memory. Repeated queries for the same search term are served from this cache without hitting the backend.
+
+<Tip>
+  For the best streaming performance in production, host the backend on a server in the same geographic region as your users. Because audio is proxied through the server, network latency between the server and the end user directly affects playback start time.
+</Tip>
